@@ -1,120 +1,160 @@
 import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import heroImg from './assets/hero.png'
 import './App.css'
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [query, setQuery] = useState('')
+  const [tracks, setTracks] = useState([])
+  const [selectedTrack, setSelectedTrack] = useState(null)
+  const [playlist, setPlaylist] = useState([])
+  const [loadingPlaylist, setLoadingPlaylist] = useState(false)
+  const [error, setError] = useState('')
+  const [message, setMessage] = useState('')
+
+  const handleSearch = async (e) => {
+    e.preventDefault()
+    setError('')
+    setMessage('')
+    setPlaylist([])
+    setSelectedTrack(null)
+
+    if (!query.trim()) return
+
+    try {
+      const response = await fetch(
+        `http://localhost:3001/api/search?q=${encodeURIComponent(query)}`
+      )
+
+      if (!response.ok) {
+        throw new Error('Search request failed')
+      }
+
+      const data = await response.json()
+      setTracks(data.tracks || [])
+    } catch (error) {
+      console.error('Search failed:', error)
+      setError('Search failed. Please try again.')
+    }
+  }
+
+  const handleUseSong = async (track) => {
+    setError('')
+    setMessage('')
+    setSelectedTrack(track)
+    setLoadingPlaylist(true)
+
+    try {
+      const res = await fetch('http://localhost:3001/api/generate-playlist', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ seedTrack: track }),
+      })
+
+      if (!res.ok) {
+        throw new Error(`Playlist request failed with status ${res.status}`)
+      }
+
+      const data = await res.json()
+      console.log('playlist response:', data)
+
+      if (data.playlist && data.playlist.length > 0) {
+        setPlaylist(data.playlist)
+        setMessage(`Generated ${data.playlist.length} songs`)
+      } else {
+        setPlaylist([])
+        setMessage('No playlist songs were returned')
+      }
+    } catch (error) {
+      console.error('Generate playlist failed:', error)
+      setError('Could not generate playlist.')
+      setPlaylist([])
+    } finally {
+      setLoadingPlaylist(false)
+    }
+  }
 
   return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Get started</h1>
+    <div className="app">
+      <header className="hero">
+        <h1>AI DJ</h1>
+        <p>Create smart playlists based on a song you choose.</p>
+      </header>
+
+      <form className="search-form" onSubmit={handleSearch}>
+        <input
+          type="text"
+          placeholder="Search for a song or artist"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+        />
+        <button type="submit">Search</button>
+      </form>
+
+      {error && <p>{error}</p>}
+      {message && <p>{message}</p>}
+      {loadingPlaylist && <p>Generating playlist...</p>}
+
+      {selectedTrack && (
+        <div className="selected-track">
+          <h2>Selected Seed Song</h2>
           <p>
-            Edit <code>src/App.jsx</code> and save to test <code>HMR</code>
+            <strong>{selectedTrack.name}</strong> by {selectedTrack.artist}
           </p>
         </div>
-        <button
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
+      )}
+
+      <section className="results">
+        <h2>Results</h2>
+
+        {tracks.length === 0 ? (
+          <p>No songs yet. Search to begin.</p>
+        ) : (
+          <div className="track-list">
+            {tracks.map((track) => (
+              <div key={track.id} className="track-card">
+                {track.image && <img src={track.image} alt={track.name} />}
+
+                <div className="track-info">
+                  <h3>{track.name}</h3>
+                  <p>{track.artist}</p>
+                </div>
+
+                <button
+                  onClick={() => handleUseSong(track)}
+                  disabled={loadingPlaylist}
+                >
+                  {loadingPlaylist && selectedTrack?.id === track.id
+                    ? 'Generating...'
+                    : 'Use This Song'}
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
       </section>
 
-      <div className="ticks"></div>
+      <section className="playlist">
+        <h2>Generated Playlist</h2>
 
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
+        {playlist.length === 0 ? (
+          <p>No playlist generated yet.</p>
+        ) : (
+          <div className="track-list">
+            {playlist.map((song, index) => (
+              <div key={`${song.name}-${index}`} className="track-card">
+                {song.image && <img src={song.image} alt={song.name} />}
+
+                <div className="track-info">
+                  <h3>{index + 1}. {song.name}</h3>
+                  <p>{song.artist}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       </section>
-
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
+    </div>
   )
 }
 
