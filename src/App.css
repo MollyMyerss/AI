@@ -457,3 +457,61 @@ button:disabled {
 ::-webkit-scrollbar { width: 6px; }
 ::-webkit-scrollbar-track { background: var(--bg); }
 ::-webkit-scrollbar-thumb { background: var(--border-glow); border-radius: 0; }
+
+.export-btn {
+  display: block;
+  width: 100%;
+  margin-top: 1rem;
+  padding: 0.7rem;
+  border: 1px solid var(--cyan);
+  background: rgba(0, 229, 255, 0.05);
+  color: var(--cyan);
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.8rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.export-btn:hover {
+  background: rgba(0, 229, 255, 0.12);
+  box-shadow: 0 0 14px rgba(0, 229, 255, 0.2);
+}
+
+/* ─── Instructions ──────────────────────────────────────── */
+.instructions {
+  margin-bottom: 2.5rem;
+}
+
+.steps {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.step {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  padding: 0.7rem 0.9rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-left: 2px solid var(--yellow);
+  border-radius: 2px;
+}
+
+.step-num {
+  font-family: 'VT323', monospace;
+  font-size: 1.4rem;
+  color: var(--yellow);
+  flex-shrink: 0;
+  line-height: 1.2;
+}
+
+.step p {
+  font-size: 0.8rem;
+  color: var(--subtext);
+  line-height: 1.5;
+  padding-top: 0.15rem;
+}

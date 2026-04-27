@@ -254,6 +254,16 @@ function App() {
     setError('')
   }
 
+  const exportPlaylist = () => {
+    const text = playlist
+      .map((song) => `${song.name} - ${song.artist}`)
+      .join('\n')
+
+    navigator.clipboard.writeText(text).then(() => {
+      window.open('https://www.tunemymusic.com/transfer', '_blank')
+    })
+  }
+
   // ── UI ─────────────────────────────────────────────────────────────────────
   return (
     <div className="app">
@@ -262,6 +272,29 @@ function App() {
         <p>Personalized AI music curator</p>
         <p className="credits">Created by Ragan, Molly, and Talia</p>
       </header>
+      <section className="instructions">
+        <h2>How It Works</h2>
+        <div className="steps">
+          <div className="step">
+            <span className="step-num">01</span>
+            <p>Search for songs and artists, or type them in manually</p>
+          </div>
+          <div className="step">
+            <span className="step-num">02</span>
+            <p>Select your genres, set how many songs you want, and add listening context</p>
+          </div>
+          <div className="step">
+            <span className="step-num">03</span>
+            <p>Hit Generate Mix and let the AI DJ build your perfect playlist</p>
+          </div>
+          <div className="step">
+            <span className="step-num">04</span>
+            <p>Click Export, then paste into Tune My Music using the Text option to send it to Spotify or Apple Music</p>
+          </div>
+        </div>
+      </section>
+
+      
 
       {error && <p className="error">{error}</p>}
       {message && <p className="message">{message}</p>}
@@ -463,7 +496,7 @@ function App() {
       <section>
         <h2>Genres</h2>
         <div className="genre-grid">
-          {['lofi', 'hiphop', 'rock', 'electronic', 'jazz', 'pop', 'r&b', 'classical'].map(
+          {['lofi', 'hiphop', 'rock', 'electronic', 'jazz', 'pop', 'r&b', 'classical', 'alternative', 'country', 'latin', 'dance'].map(
             (g) => (
               <label key={g} className={`genre-chip ${genres.includes(g) ? 'active' : ''}`}>
                 <input
@@ -516,7 +549,7 @@ function App() {
       </button>
 
       {/* ── PLAYLIST ── */}
-      {playlist.length > 0 && (
+     {playlist.length > 0 && (
         <section>
           <h2>Generated Playlist</h2>
           {playlist.map((song, i) => (
@@ -528,6 +561,9 @@ function App() {
               </div>
             </div>
           ))}
+          <button className="export-btn" onClick={exportPlaylist}>
+            ↗ Export to Spotify / Apple Music
+          </button>
         </section>
       )}
     </div>
