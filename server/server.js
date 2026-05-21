@@ -363,6 +363,8 @@ FORMAT (return exactly this, nothing else):
 // START SERVER
 // ─────────────────────────────────────────────
 
-app.listen(3001, () => {
-  console.log('SERVER RUNNING ON 3001')
-})
+const PORT = process.env.PORT || 3001;
+
+app.listen(PORT, () => {
+  console.log(`SERVER RUNNING ON ${PORT}`);
+});
